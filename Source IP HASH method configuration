@@ -1,0 +1,33 @@
+#In this example configuration, we've configured the "Source IP Hash" load balancing method along with the use of sticky sessions:
+#The global and defaults sections define global and default settings, just like in the previous examples.
+#The frontend section defines a frontend named "web" that binds to all IP addresses on port 80.
+#The default_backend directive specifies that requests received by the frontend should be forwarded to the backend named "servers".
+#The backend section defines the backend named "servers" and specifies the load balancing method as source (which refers to the Source IP Hash method).
+#The stick-table directive configures HAProxy to use a stick table to store client session information. In this example, we're using an IP-based stick table with a size of 10,000 entries.
+#The stick on src directive specifies that sticky sessions should be based on the source IP address of the client.
+#The server directives define the backend servers, as in the previous examples. Each server's IP address and port are specified, along with the check option to enable health checks.
+#With this configuration, incoming requests to HAProxy on port 80 will be distributed to the backend servers based on a hash of the source IP address of the client. Sticky sessions are enabled, meaning that requests from the same source IP address will consistently be routed to the same backend server.
+#The stick table is used to maintain session affinity based on the client's IP address. This allows subsequent requests from the same client to be routed to the same backend server, ensuring session persistence.
+#Remember to adjust the IP addresses, ports, and stick table size to match your specific setup. Additionally, you can customize the configuration further based on your requirements, such as adding SSL/TLS termination, health checks, or other features supported by HAProxy.
+
+
+global
+  # Global Settings
+
+defaults
+  mode http
+  timeout connect 5s
+  timeout client 50s
+  timeout server 50s
+
+frontend web
+  bind *:80
+  default_backend servers
+
+backend servers
+  balance source
+  stick-table type ip size 10k
+  stick on src
+  server server1 192.168.0.10:8080 check
+  server server2 192.168.0.11:8080 check
+  server server3 192.168.0.12:8080 check
