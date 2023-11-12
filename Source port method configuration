@@ -1,0 +1,35 @@
+#In this example configuration:
+#The global and defaults sections define global and default settings, similar to previous examples.
+#The frontend section defines a frontend named "web" that binds to all IP addresses on port 80.
+#The acl directives create Access Control Lists based on the source port. In this example, source_port_1 is created for requests originating from source port 1234, and source_port_2 is created for requests originating from source port 5678. You can modify these ACLs and add more as per your requirements.
+#The use_backend directives are used to redirect requests to specific backend servers based on the ACL conditions. In this example, requests coming from source port 1234 will be redirected to the server1_backend, and requests coming from source port 5678 will be redirected to the server2_backend. If the requests do not match any of the ACL conditions, they will be sent to the default_backend.
+#The backend sections define the backend servers. In this example, server1_backend is associated with the server at IP address 192.168.0.10:8080, server2_backend is associated with the server at IP address 192.168.0.11:8080, and default_backend is associated with the server at IP address 192.168.0.12:8080.
+#Please adjust the IP addresses, ports, ACL conditions, and backend server configurations to match your specific environment and requirements.
+#I hope this clarifies the configuration for redirecting requests to specific backend servers based on the source port in HAProxy.
+
+
+global
+  # Global Settings
+
+defaults
+  mode http
+  timeout connect 5s
+  timeout client 50s
+  timeout server 50s
+
+frontend web
+  bind *:80
+  acl source_port_1 src_port 1234
+  acl source_port_2 src_port 5678
+  use_backend server1_backend if source_port_1
+  use_backend server2_backend if source_port_2
+  default_backend default_backend
+
+backend server1_backend
+  server server1 192.168.0.10:8080 check
+
+backend server2_backend
+  server server2 192.168.0.11:8080 check
+
+backend default_backend
+  server default_server 192.168.0.12:8080 check
