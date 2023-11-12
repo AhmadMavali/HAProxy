@@ -1,0 +1,39 @@
+In HAProxy, a health check refers to the process of monitoring the availability and status of backend servers. Health checks are essential for ensuring that HAProxy can accurately determine the health and responsiveness of the servers it routes traffic to. By regularly performing health checks, HAProxy can make informed decisions about which servers to direct client requests to, avoiding unhealthy or unresponsive servers.
+When HAProxy performs a health check, it sends a probe to the backend server and evaluates the response. The health check can be a simple TCP check, an HTTP check, or an SSL check, depending on the configuration. The response from the server determines its health status, which can be either "UP" or "DOWN."
+If a server is marked as "UP," it is considered healthy and capable of handling client requests. HAProxy will include the server in the pool of available servers and distribute traffic to it.
+On the other hand, if a server is marked as "DOWN," it is considered unhealthy or unresponsive. HAProxy will exclude the server from the pool of available servers and not route any traffic to it until it becomes healthy again.
+Health checks can be configured with additional parameters to fine-tune the behavior and accuracy of the checks. These parameters include the interval between health checks, the number of consecutive successes or failures required to change the server's status, and specific criteria for evaluating the response.
+By implementing health checks, HAProxy helps maintain the stability, performance, and reliability of the application or service it is load balancing. It ensures that client requests are directed to healthy servers, minimizing downtime and maximizing the availability of the application.
+
+
+
+
+In this example:
+The backend section named http_backend defines the backend servers and their configuration.
+The balance directive is set to roundrobin for round-robin load balancing.
+The option httpchk directive specifies an HTTP health check.
+The GET /healthcheck HTTP/1.1\r\nHost:\ www.example.com argument specifies the HTTP request to be sent as part of the health check. Adjust the URI and Host header to match your specific health check endpoint.
+The http-check expect status 200 argument specifies that a 200 status code in the response is expected for the server to be considered healthy. Modify or add additional http-check expect directives based on the expected response from your health check endpoint.
+The http-check send-state argument sends the HAProxy state as part of the health check request.
+The http-check connect port 8080 argument specifies the port to be used for the health check connection. Modify the port number as required.
+The http-check connect timeout 5s argument sets the timeout for the health check connection to 5 seconds. Adjust the timeout value to suit your needs.
+The http-check server-close argument closes the connection after the health check request is sent.
+The server directives define the backend servers and their addresses. The check parameter enables health checks for each server.
+The inter 5s argument sets the interval between health checks to 5 seconds.
+The rise 2 argument specifies that two consecutive successful health checks are required to mark a server as "UP."
+The fall 3 argument specifies that three consecutive failed health checks are required to mark a server as "DOWN."
+You can customize the health check configuration by adjusting the HTTP request, response expectations, timeouts, intervals, rise and fall values, and other parameters based on your specific requirements.
+
+
+
+
+backend http_backend
+  balance roundrobin
+  option httpchk GET /healthcheck HTTP/1.1\r\nHost:\ www.example.com
+  http-check expect status 200
+  http-check send-state
+  http-check connect port 8080
+  http-check connect timeout 5s
+  http-check server-close
+  server server1 192.168.0.10:8080 check inter 5s rise 2 fall 3
+  server server2 192.168.0.11:8080 check inter 5s rise 2 fall 3
