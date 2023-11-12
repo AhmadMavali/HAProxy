@@ -1,0 +1,53 @@
+#In this example:
+#The global section defines global settings for HAProxy, including logging, user and group permissions, and daemon mode.
+#The defaults section sets default configuration options for all subsequent frontends and backends. It includes settings for logging, HTTP mode, timeouts, and various HTTP options.
+#The frontend section named http_frontend is created to handle incoming HTTP traffic on port 80.
+#The bind directive specifies that HAProxy should listen on all IP addresses (*) on port 80.
+#The mode http directive sets the mode to HTTP.
+#The default_backend directive specifies that incoming requests should be forwarded to the backend named http_backend if no other rules match.
+#The backend section named http_backend defines the backend servers and their configuration.
+#The balance directive is set to dynamic for dynamic load balancing based on weights.
+#The dynamic-cookie-key directive sets the cookie key name used for dynamic weight assignments.
+#The dynamic-cookie-show-url-param directive specifies the URL parameter to be included in the dynamic weight cookie's value.
+#The dynamic-cookie-use-url-param directive specifies the URL parameter to be used for updating the dynamic weight.
+#The dynamic-cookie-update-interval directive defines the interval at which HAProxy updates the dynamic weights based on URL parameter values.
+#The server directives define the backend servers, specifying their IP addresses and ports, using the check option to enable health checks, and assigning initial weights.
+#Please adjust the IP addresses, ports, and backend server configurations to match your specific environment and requirements. You can add or remove backend servers as needed.
+#Remember to ensure that HAProxy is properly installed and configured on your system before using this configuration file.
+
+
+
+
+global
+  log /dev/log local0
+  log /dev/log local1 notice
+  chroot /var/lib/haproxy
+  stats socket /run/haproxy/admin.sock mode 660 level admin expose-fd listeners
+  stats timeout 30s
+  user haproxy
+  group haproxy
+  daemon
+
+defaults
+  log global
+  mode http
+  option httplog
+  option dontlognull
+  timeout connect 5s
+  timeout client 1m
+  timeout server 1m
+
+frontend http_frontend
+  bind *:80
+  mode http
+  default_backend http_backend
+
+backend http_backend
+  balance dynamic
+  dynamic-cookie-key myapp
+  dynamic-cookie-show-url-param name
+  dynamic-cookie-use-url-param id
+  dynamic-cookie-update-interval 10s
+  server server1 192.168.0.10:8080 check weight 100
+  server server2 192.168.0.11:8080 check weight 200
+  server server3 192.168.0.12:8080 check weight 300
