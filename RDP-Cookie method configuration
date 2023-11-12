@@ -1,0 +1,62 @@
+#When load balancing Windows Terminal Server (also known as Remote Desktop Services), you have two primary options: using HAProxy with RDP Cookies or utilizing Microsoft's built-in Connection Broker.
+#Load Balancing with HAProxy and RDP Cookies:
+#Configure HAProxy as a TCP load balancer to distribute RDP traffic across multiple Terminal Servers.
+#Enable RDP Cookies in HAProxy to maintain session affinity.
+#The HAProxy configuration would be similar to the example provided earlier, where the mode tcp is used, and the cookie directive is set to maintain session affinity based on cookies.
+#Load Balancing with Microsoft Connection Broker:
+#Utilize Microsoft's built-in Remote Desktop Connection Broker (RD Connection Broker) for load balancing Terminal Servers.
+#RD Connection Broker acts as a central component that manages the distribution of RDP sessions across multiple Terminal Servers.
+#It provides session persistence, load balancing, and high availability features specifically designed for RDP traffic.
+#You would typically configure RD Connection Broker with a pool of Terminal Servers, and it would handle the load balancing and session redirection based on various algorithms and policies.
+#The exact configuration steps for RD Connection Broker depend on the version of Windows Server you are using. Refer to the Microsoft documentation for detailed guidance on configuring and utilizing RD Connection Broker.
+#The choice between HAProxy with RDP Cookies and Microsoft Connection Broker depends on your specific requirements, environment, and preferences. Here are some considerations:
+#HAProxy with RDP Cookies is a more generic solution that can be used for load balancing RDP traffic in various environments, including non-Windows systems. It provides flexibility and control over the load balancing configuration but requires additional setup and maintenance.
+#Microsoft Connection Broker is a specialized solution specifically designed for load balancing Terminal Servers. It offers advanced features and integration with other components of the Remote Desktop Services infrastructure. It may be more suitable if you are already utilizing Remote Desktop Services and prefer a Microsoft-supported solution.
+#Consider your specific needs, environment, and familiarity with the tools when deciding between HAProxy with RDP Cookies or Microsoft Connection Broker for load balancing Windows Terminal Server.
+
+
+
+
+#In this example:
+#The global section defines global settings for HAProxy, including logging, user and group permissions, and daemon mode.
+#The defaults section sets default configuration options for all subsequent frontends and backends. It includes settings for logging, TCP mode, timeouts, and TCP health checks.
+#The listen section named rdp is created to handle RDP traffic on port 3389.
+#The bind directive specifies that HAProxy should listen on all IP addresses (*) on port 3389.
+#The balance directive is set to source for source IP-based load balancing.
+#The cookie directive configures HAProxy to insert RDP cookies named "SERVERID" into traffic, ensuring session affinity.
+#The option tcpka enables TCP keep-alive packets for idle connections.
+#The option tcp-check enables TCP health checks to ensure backend servers are responsive.
+#The server directives define the backend Terminal Servers and their respective IP addresses and ports. Each server is assigned a unique cookie value using the cookie parameter.
+#Please adjust the IP addresses, ports, and backend server configurations to match your specific environment and requirements. You can add or remove backend servers as needed.
+
+
+
+global
+  log /dev/log local0
+  log /dev/log local1 notice
+  chroot /var/lib/haproxy
+  stats socket /run/haproxy/admin.sock mode 660 level admin expose-fd listeners
+  stats timeout 30s
+  user haproxy
+  group haproxy
+  daemon
+
+defaults
+  log global
+  mode tcp
+  option tcplog
+  option tcp-check
+  timeout connect 5s
+  timeout client 1h
+  timeout server 1h
+
+listen rdp
+  bind *:3389
+  mode tcp
+  balance source
+  cookie SERVERID insert indirect nocache
+  option tcpka
+  option tcp-check
+  server rdp1 192.168.0.10:3389 check cookie rdp1
+  server rdp2 192.168.0.11:3389 check cookie rdp2
+  server rdp3 192.168.0.12:3389 check cookie rdp3
