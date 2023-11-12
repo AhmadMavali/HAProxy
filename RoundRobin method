@@ -1,0 +1,41 @@
+#In this example configuration:
+
+#The global section defines global settings for HAProxy.
+#The defaults section specifies default settings for HTTP mode and sets various timeouts.
+#The frontend section defines a frontend named "web" that binds to all IP addresses on port 80.
+#The default_backend directive specifies that requests received by the frontend should be forwarded to the backend named "servers".
+#The backend section defines the backend named "servers" and specifies the load balancing method as roundrobin.
+#The server directives define the backend servers. In this case, we have three servers with their IP addresses and ports specified. The check option ensures that HAProxy performs health checks on these servers.
+#With this configuration, incoming requests to HAProxy on port 80 will be distributed in a round-robin fashion across the three backend servers (server1, server2, and server3), ensuring an even distribution of traffic.
+#You can save this configuration to a file (e.g., haproxy.cfg) and start HAProxy with the following command: haproxy -f haproxy.cfg
+#Please note that this is a basic example, and you may need to adjust the configuration based on your specific requirements, such as SSL/TLS termination, logging, or additional settings.
+
+
+
+
+
+
+
+
+global
+  # Global Settings
+
+defaults
+  mode http
+  timeout connect 5s
+  timeout client 50s
+  timeout server 50s
+
+frontend web
+  bind *:80
+  default_backend servers
+
+backend servers
+  balance roundrobin
+  server server1 192.168.0.10:8080 check
+  server server2 192.168.0.11:8080 check
+  server server3 192.168.0.12:8080 check
+
+
+
+
