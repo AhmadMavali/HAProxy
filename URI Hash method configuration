@@ -1,0 +1,35 @@
+#In this example configuration, we've configured the "URI Hash" load balancing method along with some additional options:
+#The global and defaults sections define global and default settings, just like in the previous examples.
+#The frontend section defines a frontend named "web" that binds to all IP addresses on port 80.
+#The default_backend directive specifies that requests received by the frontend should be forwarded to the backend named "servers".
+#The backend section defines the backend named "servers" and specifies the load balancing method as uri (which refers to the URI Hash method).
+#The hash-type consistent directive specifies that a consistent hashing algorithm should be used for load balancing based on the URI.
+#The hash-uri-length 128 directive sets the maximum length of the URI used for hashing to 128 characters.
+#The server directives define the backend servers, as in the previous examples. Each server's IP address and port are specified, along with the check option to enable health checks.
+#With this configuration, incoming requests to HAProxy on port 80 will be distributed to the backend servers based on a hash of the URI. The consistent hashing algorithm ensures that requests with the same URI are consistently routed to the same backend server.
+#The hash-uri-length option allows you to control the length of the URI used for hashing. By default, the entire URI is used, but you can limit it to a specific length if desired.
+#Remember to adjust the IP addresses, ports, and hash URI length to match your specific setup. Additionally, you can customize the configuration further based on your requirements, such as adding SSL/TLS termination, health checks, or other features supported by HAProxy.
+
+
+
+
+global
+  # Global Settings
+
+defaults
+  mode http
+  timeout connect 5s
+  timeout client 50s
+  timeout server 50s
+
+frontend web
+  bind *:80
+  default_backend servers
+
+backend servers
+  balance uri
+  hash-type consistent
+  hash-uri-length 128
+  server server1 192.168.0.10:8080 check
+  server server2 192.168.0.11:8080 check
+  server server3 192.168.0.12:8080 check
