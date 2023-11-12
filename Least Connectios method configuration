@@ -1,0 +1,34 @@
+#In this example configuration, we've added a health check and configured the "Least Connections" load balancing method:
+#The global and defaults sections define global and default settings, just like in the previous example.
+#The frontend section defines a frontend named "web" that binds to all IP addresses on port 80.
+#The default_backend directive specifies that requests received by the frontend should be forwarded to the backend named "servers".
+#The backend section defines the backend named "servers" and specifies the load balancing method as leastconn.
+#The option httpchk directive enables HTTP health checks for the backend servers. The /healthcheck path is used for checking the health of each server.
+#The http-check expect status 200 directive specifies that a successful health check response should have a status code of 200.
+#The server directives define the backend servers, similar to the previous example. Each server's IP address and port are specified, along with the check option to enable health checks.
+#With this configuration, incoming requests to HAProxy on port 80 will be distributed to the backend servers based on the least number of active connections. The health checks will be performed on each server by sending an HTTP GET request to /healthcheck, and only servers that respond with a status code of 200 will receive traffic.
+#Remember to adjust the IP addresses, ports, and health check paths to match your specific setup. Additionally, you can customize the configuration further based on your requirements, such as adding SSL/TLS termination, session persistence, or other features supported by HAProxy.
+
+
+
+
+global
+  # Global Settings
+
+defaults
+  mode http
+  timeout connect 5s
+  timeout client 50s
+  timeout server 50s
+
+frontend web
+  bind *:80
+  default_backend servers
+
+backend servers
+  balance leastconn
+  option httpchk GET /healthcheck
+  http-check expect status 200
+  server server1 192.168.0.10:8080 check
+  server server2 192.168.0.11:8080 check
+  server server3 192.168.0.12:8080 check
