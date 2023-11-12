@@ -1,0 +1,25 @@
+HAProxy supports various load balancing methods that determine how incoming requests are distributed across backend servers. Here are some commonly used load balancing algorithms supported by HAProxy along with brief explanations and examples:
+
+Round Robin (default): Requests are assigned to backend servers in a sequential manner. Each new request is routed to the next server in line. This method is simple and ensures that all servers receive an equal number of requests. Example: If you have three backend servers A, B, and C, requests would be distributed as A, B, C, A, B, C, and so on.
+
+Least Connections: Requests are directed to the server with the fewest active connections at the time of the request. This algorithm aims to distribute the load more evenly based on server capacity. Example: If server A has 10 active connections, server B has 8, and server C has 6, the next request would be routed to server C.
+
+Source IP Hash: The source IP address of the client is hashed, and requests from the same IP address are consistently sent to the same backend server. This method ensures that requests from a particular client are always routed to the same server, which can be useful for maintaining session affinity. Example: If a client with IP address 192.168.0.100 sends multiple requests, all of those requests will be routed to the same backend server.
+
+URI Hash: The URI (Uniform Resource Identifier) of the request is hashed, and requests with the same URI are consistently sent to the same backend server. This method is useful when you want to maintain affinity based on the requested resource. Example: If multiple requests with the same URI "/api/products" are received, all of those requests will be routed to the same backend server.
+
+Static-rr (Static Round Robin): This method allows you to manually assign weights to backend servers, determining the proportion of requests each server receives. Servers with higher weights receive more requests. Example: Server A is assigned a weight of 2, and server B is assigned a weight of 1. In this case, for every two requests sent to server A, one request will be sent to server B.
+
+Source IP: Requests from the same source IP address are always routed to the same backend server. This method is useful when maintaining session affinity is crucial. Example: If a client with IP address 192.168.0.100 sends multiple requests, all of those requests will be routed to the same backend server.
+
+Least Time: Requests are routed to the server with the lowest average response time. HAProxy measures the response time of each server and dynamically adjusts the routing to ensure that requests are sent to the server with the fastest response. This method is beneficial when you want to optimize for the server's response time.
+
+Source Port: Requests with the same source port are consistently sent to the same backend server. This method is useful in scenarios where clients establish persistent connections using the same source port, such as FTP (File Transfer Protocol) or SIP (Session Initiation Protocol).
+
+RDP-cookie: This method is specific to Remote Desktop Protocol (RDP) traffic. HAProxy inspects the RDP cookie in the request and uses it to determine which backend server should handle the request. This method enables session persistence for RDP connections.
+
+URL Parameter: HAProxy can use a specific URL parameter in the request to determine the backend server. This method is useful when you want to distribute requests based on a particular parameter value, such as a user ID or a specific query parameter.
+
+Dynamic Weight: HAProxy allows you to dynamically adjust the weight of backend servers based on their health or other factors. You can define custom rules that modify the weights of servers in real-time, allowing you to dynamically adapt to changing conditions.
+
+Response Rate Limiting: HAProxy can limit the number of requests it forwards to backend servers based on response times. This method helps prevent overloading servers that may be responding slowly or experiencing high latency.
