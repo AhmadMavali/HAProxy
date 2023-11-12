@@ -1,0 +1,53 @@
+Install HAProxy and Keepalived on both servers: Make sure you have HAProxy and Keepalived installed on both servers that will be part of the HA setup. You can use your package manager to install these tools.
+Configure HAProxy: Edit the HAProxy configuration file (haproxy.cfg) on both servers. Specify the backend servers and any other settings you need. Make sure to listen on the same port on both servers.
+Configure Keepalived: Edit the Keepalived configuration file (keepalived.conf) on both servers. Here's an example configuration:
+On Server 1:
+   vrrp_script chk_haproxy {
+       script "killall -0 haproxy"
+       interval 2
+       weight 2
+   }
+
+   vrrp_instance VI_1 {
+       state MASTER
+       interface eth0
+       virtual_router_id 51
+       priority 101
+       advert_int 1
+       authentication {
+           auth_type PASS
+           auth_pass your_password
+       }
+       virtual_ipaddress {
+           192.168.0.100
+       }
+       track_script {
+           chk_haproxy
+       }
+   }
+
+On Server 2:
+
+   vrrp_script chk_haproxy {
+       script "killall -0 haproxy"
+       interval 2
+       weight 2
+   }
+
+   vrrp_instance VI_1 {
+       state BACKUP
+       interface eth0
+       virtual_router_id 51
+       priority 100
+       advert_int 1
+       authentication {
+           auth_type PASS
+           auth_pass your_password
+       }
+       virtual_ipaddress {
+           192.168.0.100
+       }
+       track_script {
+           chk_haproxy
+       }
+   }
